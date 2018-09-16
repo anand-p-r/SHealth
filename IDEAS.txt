@@ -1,0 +1,4 @@
+1. Plot location vs Heart Rate
+2. Plot location vs exercise
+3. Based on start time, analyse exercise performance
+4.  
