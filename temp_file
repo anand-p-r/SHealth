@@ -1,0 +1,63 @@
+# Sleep patterns before atheletics
+
+## Sleep records are sorted in ascending order of sleep start time.
+## If sleep time is less than 4hrs in one record, check two cases for combining data:
+## First check if the difference between sleep start time in current record and 
+## sleep end time on last record is less than 30mins
+## Then check if the difference between sleep end time in this record and 
+## sleep start time in next record is less than 30mins
+
+for ind, row in atheletics_sleep.iterrows():
+    check_next = now_break = False
+    prev_day  = (pd.to_datetime(row["start_time"]) - pd.Timedelta("1 day")).date()
+    for dni, wor in sleep_data.iterrows():
+
+        ## Next record checking for combining data
+        if (check_next):
+            corrected = False
+            nxt_sleep_start_dt = pd.to_datetime(wor["sleep_start_time"])
+            diff = nxt_sleep_start_dt - curr_sleep_end_dt
+            if (diff.seconds < 1800): ## Difference between sleep times is less than 30minutes, then combine the duration
+                atheletics_sleep.loc[ind, "prev_motionless_sleep_duration"] += sleep_data.loc[dni, "motionless_sleep_duration"]
+                atheletics_sleep.loc[ind, "prev_total_sleep_duration"]      += sleep_data.loc[dni, "total_duration"]
+                eff = (atheletics_sleep.loc[ind, "prev_sleep_efficiency"] + sleep_data.loc[dni, "efficiency"]) / 2
+                atheletics_sleep.loc[ind, "prev_sleep_efficiency"]          = eff
+                corrected = True
+            check_next = False
+            now_break = True
+        
+        sleep_day = (pd.to_datetime(wor["sleep_start_time"])).date()
+        if (prev_day == sleep_day):
+            atheletics_sleep.loc[ind, "prev_motionless_sleep_duration"] = sleep_data.loc[dni, "motionless_sleep_duration"]
+            atheletics_sleep.loc[ind, "prev_total_sleep_duration"]      = sleep_data.loc[dni, "total_duration"]
+            atheletics_sleep.loc[ind, "prev_sleep_efficiency"]          = sleep_data.loc[dni, "efficiency"]
+            
+            if (sleep_data.loc[dni, "total_duration"]/60000 < 240):
+                check_next = True
+                now_break = False
+                curr_sleep_end_dt = pd.to_datetime(wor["sleep_end_time"])
+                
+                ## Previous record checking for combining data
+                if (dni-1 >= 0):
+                    curr_sleep_start_dt = pd.to_datetime(wor["sleep_start_time"])
+                    prev_sleep_end_dt = pd.to_datetime(sleep_data.loc[dni-1, "sleep_end_time"])
+                    diff = curr_sleep_start_dt - prev_sleep_end_dt
+                    if (diff.seconds < 1800): ## Difference between sleep times is less than 30minutes, then combine the duration
+                        atheletics_sleep.loc[ind, "prev_motionless_sleep_duration"] += sleep_data.loc[dni-1, "motionless_sleep_duration"]
+                        atheletics_sleep.loc[ind, "prev_total_sleep_duration"]      += sleep_data.loc[dni-1, "total_duration"]
+                        eff = (atheletics_sleep.loc[ind, "prev_sleep_efficiency"] + sleep_data.loc[dni, "efficiency"]) / 2
+                        atheletics_sleep.loc[ind, "prev_sleep_efficiency"]          = eff
+            
+        if (now_break):
+            break
+
+## Add heart Zone column
+hz_col = atheletics_sleep.apply(lambda row_val: heart_zone_calc("mean_heart_rate", row_val), axis=1)
+atheletics_sleep = atheletics_sleep.assign(heart_zone = hz_col.values)
+            
+## Add Exercise name column
+atheletics_sleep.insert(loc=len(atheletics_sleep.columns), column="ex_name", value="")
+ex_col = atheletics_sleep.apply(lambda row_val: ex_name(row_val), axis=1)
+atheletics_sleep = atheletics_sleep.assign(ex_name=ex_col.values)
+
+atheletics_sleep.head(5)

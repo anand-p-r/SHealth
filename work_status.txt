@@ -3,14 +3,26 @@
 
 
 
-
-
-
-
-
-
 Plotting options
-1. Calories Vs. Mean heart rate
-1a. Colour the bubbles based on heart zones
-1b- Color the bubbles based on activities
+1. Calories Vs. Mean heart rate --> Done
+1a. Colour the bubbles based on heart zones --> Done
+1b- Color the bubbles based on activities --> Done
+------
+2. Prev. Day Sleep Vs Exercise
+2a. Prev day sleep vs atheletics duration --> Done
+2b Prev day sleep vs atheletics type --> Done
+2c. Prev day sleep vs atheletics kms --> Done
+2c. prev. Day Sleep Vs atheletics calories burnt --> Done
+2d. Prev Day Sleep Vs mean_speed for atheletics
+2e. Prev. day sleep vs weight training calories
+2f. Prev. day sleep vs weight training duration
+
+3. Ex Vs Sleep Next day
+3a. Weight training duration Vs Sleep duration next day
+3b. Weight training duration Vs Motionless sleep next day
+
+3. Sleep Vs Resting Heart Rate next day
+
+4. Periodic pattern in resting heart rate
+
 
